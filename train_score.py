@@ -1,4 +1,4 @@
-#######在训练集上测试准确率
+#######在训练集上测试准确率#########
 import json
 import pickle
 from pairwise_evaluate import pairwise_evaluate

@@ -1,3 +1,5 @@
+####测试用的函数，提交验证集结果不需要。
+
 def pairwise_evaluate(correct_labels,pred_labels):
     TP = 0.0  # Pairs Correctly Predicted To SameAuthor
     TP_FP = 0.0  # Total Pairs Predicted To SameAuthor

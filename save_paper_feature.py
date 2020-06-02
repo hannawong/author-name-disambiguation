@@ -1,3 +1,4 @@
+##########给出validation set的结果############
 import json,re
 import numpy as np
 import pickle
@@ -27,12 +28,12 @@ for name in name_pubs1:
     ##论文关系表征向量
     ###############################################################
     all_embs = []
-    rw_num = 5
+    rw_num = 5    ###集成学习，参数可调
     cp = set()
     for k in range(rw_num):
-        mpg.generate_WMRW("gene/RandomWalk.txt", 5, 20)
+        mpg.generate_WMRW("gene/RandomWalk.txt", 5, 20)  #numwalks，walklength,参数可调
         sentences = word2vec.Text8Corpus(r'gene/RandomWalk.txt')
-        model = word2vec.Word2Vec(sentences, size=100, min_count=1,iter=10,negative=25, window=10)
+        model = word2vec.Word2Vec(sentences, size=100, min_count=1,iter=10,negative=25, window=10)  ##表征关系的word2vec，参数可调
         embs = []
         for i, pid in enumerate(papers):
             if pid in model:
@@ -72,10 +73,10 @@ for name in name_pubs1:
     ##文本距离
     t_sim = pairwise_distances(tembs, metric="cosine")
     ##整体距离
-    w = 1
+    w = 1  ##文本距离和网络关系距离的权重分配，参数可调。
     sim = (np.array(sk_sim) + w * np.array(t_sim)) / (1 + w)
     ####cluster
-    pre = DBSCAN(eps=0.25, min_samples=4, metric="precomputed").fit_predict(sim)
+    pre = DBSCAN(eps=0.25, min_samples=4, metric="precomputed").fit_predict(sim)  #参数可调。
     ##离群论文
     for i in range(len(pre)):
         if pre[i] == -1:
@@ -85,7 +86,8 @@ for name in name_pubs1:
     for i in tcp:
         outlier.add(i)
 
-    ##基于阈值的相似性匹配
+    ##基于阈值的相似性匹配,阈值可调
+    threshold=1.5
     paper_pair = generate_pair(papers, outlier)
     paper_pair1 = paper_pair.copy()
     K = len(set(pre))
@@ -96,7 +98,7 @@ for name in name_pubs1:
         while j in outlier:
             paper_pair[i][j] = -1
             j = np.argmax(paper_pair[i])
-        if paper_pair[i][j] >= 1.5:
+        if paper_pair[i][j] >= threshold:
             pre[i] = pre[j]
         else:
             pre[i] = K
@@ -107,7 +109,7 @@ for name in name_pubs1:
             if jj <= ii:
                 continue
             else:
-                if paper_pair1[i][j] >= 1.5:
+                if paper_pair1[i][j] >= threshold:
                     pre[j] = pre[i]
 
 

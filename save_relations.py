@@ -1,7 +1,9 @@
+#####将所有paper的语义表征向量存储在gene/ptext_embedding.pkl
+#####将paper的关系存储在gene/paper_author.txt、gene/paper_conf.txt、gene/paper_word.txt、gene/paper_org.txt
+
 import json,re
 import numpy as np
 import pickle
-
 word_len=250
 from gensim.models import word2vec
 def save_relation(name_pubs_raw, name): # 保存论文的各种feature
@@ -10,8 +12,7 @@ def save_relation(name_pubs_raw, name): # 保存论文的各种feature
     file=open("genename/"+name_pubs_raw,"r",encoding="utf-8")
     name_pubs_raw = json.load(file)
     ## trained by all text in the datasets. Training code is in the cells of "train word2vec"
-    save_model_name = "word2vec/word2vec.model"
-    model_w = word2vec.Word2Vec.load(save_model_name)
+    model_w = word2vec.Word2Vec.load("word2vec/word2vec.model")
 
     r = '[!“”"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~—～’]+'
     stopword = ['at', 'based', 'in', 'of', 'for', 'on', 'and', 'to', 'an', 'using', 'with', 'the', 'by', 'we', 'be',
@@ -19,10 +20,10 @@ def save_relation(name_pubs_raw, name): # 保存论文的各种feature
     stopword1 = ['university', 'univ', 'china', 'department', 'dept', 'laboratory', 'lab', 'school', 'al', 'et',
                  'institute', 'inst', 'college', 'chinese', 'beijing', 'journal', 'science', 'international']
 
-    f1 = open('gene/paper_author.txt', 'w', encoding='utf-8')
-    f2 = open('gene/paper_conf.txt', 'w', encoding='utf-8')
-    f3 = open('gene/paper_word.txt', 'w', encoding='utf-8')
-    f4 = open('gene/paper_org.txt', 'w', encoding='utf-8')
+    f1 = open('gene/paper_author.txt', 'w', encoding='utf-8') #paper_id->author
+    f2 = open('gene/paper_conf.txt', 'w', encoding='utf-8')  #paper_id->venue
+    f3 = open('gene/paper_word.txt', 'w', encoding='utf-8')  #paper_id->keyword
+    f4 = open('gene/paper_org.txt', 'w', encoding='utf-8')  #paper->org
     taken = name.split("_")
     name = taken[0] + taken[1]
     name_reverse = taken[1] + taken[0]
@@ -65,7 +66,6 @@ def save_relation(name_pubs_raw, name): # 保存论文的各种feature
         org_=set(org_)
         for word in org_:
             f4.write(paperid + ' ' + word + '\n')
-
         # save venue
         pstr = paper["venue"].strip()
         pstr = pstr.lower()
@@ -120,8 +120,7 @@ def save_relation(name_pubs_raw, name): # 保存论文的各种feature
         ptext_emb[paperid] = np.mean(words_vec, 0)
 
     #  ptext_emb: key is paper id, and the value is the paper's text embedding
-    out1=open("gene/ptext_embedding.pkl","wb")  #存储所有paper的向量
-    out2=open("gene/tcp.pkl","wb")
+    out1=open("gene/ptext_embedding.pkl","wb")  #存储所有paper的向量(表征paper的语义关系)
+    out2=open("gene/tcp.pkl","wb")  #离群paper的id
     pickle.dump(ptext_emb,out1)
-    # the paper index that lack text information
     pickle.dump(tcp,out2)
